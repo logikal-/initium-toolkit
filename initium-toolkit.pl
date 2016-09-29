@@ -62,7 +62,10 @@ if(!$email || !$password)
     print q(
         [ Login ]
 
-        Save this password? [Y/n]: );
+        Save this password? [Y/n]:
+        WARNING: Password will be
+        saved in plaintext in file
+        "initium-initfo.dat": );
     my $savePass = <STDIN>;
     chomp($savePass);
     open(my $fh, '>', "./initium-initfo.dat") or die("Couldn't open file: $!\n");
