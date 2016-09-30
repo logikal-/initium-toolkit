@@ -22,6 +22,7 @@ sub ClearScr()
 
 sub market()
 {
+    keepbuying:
     my $cookie_jar = HTTP::Cookies->new(
     file => "initium-cookie.dat",
     autosave => 1,
@@ -63,6 +64,7 @@ sub market()
     $url = "https://www.playinitium.com/locationmerchantlist.jsp";
     $response = $browser->get($url);
     my $counter = 0;
+    my $itemPrice = 0;
     my $cntMultiplier = 1;
     my @saleItemIdArray = ();
     my @itemIdArray = ();
@@ -90,10 +92,10 @@ sub market()
 		if($response->is_success)
 		{
 			my $content2 = $response->decoded_content;
-			while($content2 =~ m/viewitemmini.jsp\?itemId=(\d{14,18})'><img src='(.{1,200}?)>(.{0,40}?)<\/a> - <a onclick='storeBuyItemNew\(event, "(.{0,25}?)$itemName(.{0,25}?)","([\d,]{1,12})",(\d{14,18}),(\d{14,18}),/sgi)
-			{
+			while($content2 =~ m/viewitemmini.jsp\?itemId=(\d{14,18})'><img src='(.{1,200}?)>(.{0,40}?)<\/a> - <a onclick='storeBuyItemNew\(event, "(.{0,25}?)$itemName(.{0,25}?)","([0-9,]{1,8}?)",(\d{14,18}),(\d{14,18}),/gi)
+			{       $itemPrice = 0;
 				my $tempItemName = $3;
-				my $itemId = $1; my $itemPrice = $6; my $saleItemId = $8;
+				my $itemId = $1; $itemPrice = $6; my $saleItemId = $8;
 				if($itemId && $itemPrice && $saleItemId)
 				{
 					$url = "http://www.playinitium.com/viewitemmini.jsp?itemId=$itemId";
@@ -200,7 +202,7 @@ sub market()
 							{
 								print "[+] Purchase successful\n";
 						
-							} else { print "Purchase failed for some reason\n".$response->content."\n".$response->status_line."\n"; }
+							} else { print "Purchase failed for some reason\nSale item ID: ".$saleItemIdArray[$singleItemToBuy]."\nItem ID: ".$itemIdArray[$singleItemToBuy]."\n".$response->content."\n".$response->status_line."\n"; }
 						} else { die("Error 5502: Unable to purchase item: $!\n".$response->status_line."\n"); }
 					}
 				}
