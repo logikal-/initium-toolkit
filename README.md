@@ -10,11 +10,15 @@ Right now you can auto travel to mostly anywhere east of Aera and from Aera to V
 Install ActiveState perl, and use the Perl Package Manager to install
 the required modules:
 
-Term::ANSIColor
-Term::ProgressBar
-LWP::UserAgent::Determined
-Switch
-Time::HiRes
+    Term::ANSIColor
+
+    Term::ProgressBar
+
+    LWP::UserAgent::Determined
+
+    Switch
+
+    Time::HiRes
 
 Run initium-toolkit.pl
 
@@ -28,11 +32,15 @@ apt-get install cpan
 
 Use cpan to install the required modules:
 
-Term::ANSIColor
-Term::ProgressBar
-LWP::UserAgent::Determined
-Switch
-Time::HiRes
+    Term::ANSIColor
+
+    Term::ProgressBar
+
+    LWP::UserAgent::Determined
+    
+    Switch
+    
+    Time::HiRes
 
 to start the program:
     perl initium-toolkit.pl
