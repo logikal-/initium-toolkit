@@ -123,8 +123,9 @@ switch($input)
 
         printLogo();
         my @absPath = calculatePath($destiny);
-	if(!$absPath[0])
+	if(!$absPath[1])
 	{
+            printLogo();
             print "Path not found\n";
         }
         else
