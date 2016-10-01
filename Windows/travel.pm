@@ -133,8 +133,11 @@ sub Travel($$)
             {
                 RetreatSingleCombat();
                 sleep(2);
-                Travel($gotoAscii, 1);
-                last;
+                print "[+] Completing travel\n";
+                while(Travel($gotoAscii, 1) == 0)
+                {
+                }
+                return 1;
             }
             if($currentlocation eq $gotoAscii)
             {
