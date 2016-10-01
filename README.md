@@ -7,8 +7,11 @@ Right now you can auto travel to mostly anywhere east of Aera and from Aera to V
 
 ### Windows
 
-Install ActiveState perl, and use the Perl Package Manager to install
-the required modules:
+Install ActivePerl:
+
+http://www.activestate.com/activeperl
+
+Use the included Perl Package Manager to install the required modules:
 
     Term::ANSIColor
 
@@ -20,15 +23,15 @@ the required modules:
 
     Time::HiRes
 
-Run initium-toolkit.pl
+Run initium-toolkit.pl by double clicking on it
 
 ### Linux
 
 Use your package manager to install cpan, eg.:
 
-pacman -S cpan
+    pacman -S cpan
 
-apt-get install cpan
+    apt-get install cpan
 
 Use cpan to install the required modules:
 
@@ -43,5 +46,6 @@ Use cpan to install the required modules:
     Time::HiRes
 
 to start the program:
+
     perl initium-toolkit.pl
     

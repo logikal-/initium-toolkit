@@ -6,6 +6,7 @@ use market;
 use Term::ANSIColor;
 use path;
 use travel;
+use Term::ProgressBar;
 
 my $lg = "ICBfX19fXyAgICAgICBfIF8gICBfICAgICAgICAgICAgICAgIF9fX19fICAgICAgICAgICAgXyBfICAgICAgICAgICAgICAgDQogIFxfICAgXF8gX18gKF8pIHxfKF8pXyAgIF8gXyBfXyBfX18vX18gICBcX19fICAgX19fIHwgfCB8X18gICBfX19fXyAgX18NCiAgIC8gL1wvICdfIFx8IHwgX198IHwgfCB8IHwgJ18gYCBfIFwgLyAvXC8gXyBcIC8gXyBcfCB8ICdfIFwgLyBfIFwgXC8gLw0KL1wvIC9fIHwgfCB8IHwgfCB8X3wgfCB8X3wgfCB8IHwgfCB8IC8gLyB8IChfKSB8IChfKSB8IHwgfF8pIHwgKF8pID4gIDwgDQpcX19fXy8gfF98IHxffF98XF9ffF98XF9fLF98X3wgfF98IHxfXC8gICBcX19fLyBcX19fL3xffF8uX18vIFxfX18vXy9cX1wNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEhhbmQgY29kZWQgd2l0aCBsb3ZlIC0gRnJleWph";
 
@@ -113,6 +114,8 @@ switch($input)
     }
     case "2"
     {
+        print colored("Current location: ", 'yellow');
+        print colored(GetCurrentLocation()."\n", 'reset');
 	print colored("Enter destination: ", 'yellow');
         print color('reset');
         my $destiny = <STDIN>;
@@ -130,17 +133,24 @@ switch($input)
             #It's being kept for later
             for my $path (@absPath)
             {
+                print "\n";
                 @$path = reverse @$path;
                 pop @$path;
                 @$path = reverse @$path;
+                print "Traveling to ".@$path[0]."\n";
                 foreach my $location (@$path)
                 {
-		    print "[+] Traveling to $location\n    ";
                     my $loopNum = 1;
+                    print "\rTraveled to $location               ";
+                    my $progressbar = Term::ProgressBar->new({ count => 100, term_width=>30 });
+                    my $progressCnt = 0;
                     while(!(Travel($location,$loopNum)))
                     {
+                        $progressbar->update($progressCnt);
+                        $progressCnt += 33;
                         $loopNum++;
                     }
+                    $progressbar->update(100); print "\n";
                 }
                 last;
             }
