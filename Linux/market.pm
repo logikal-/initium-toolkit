@@ -22,6 +22,7 @@ sub ClearScr()
 
 sub market()
 {
+    keepbuying:
     my $cookie_jar = HTTP::Cookies->new(
     file => "initium-cookie.dat",
     autosave => 1,
