@@ -194,7 +194,7 @@ sub calculatePath($)
             print "$counter. $location\n";
             $counter++;
         }
-        print "Cost: ".$pathObj->get_path_cost(@$path)."\n";
+#       print "Cost: ".$pathObj->get_path_cost(@$path)."\n";
         last;
     }
     return @paths;
