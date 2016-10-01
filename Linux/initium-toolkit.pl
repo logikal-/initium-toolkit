@@ -114,8 +114,9 @@ switch($input)
     }
     case "2"
     {
+        my $currentlocation = GetCurrentLocation();
         print colored("Current location: ", 'yellow');
-        print colored(GetCurrentLocation()."\n", 'reset');
+        print colored($currentlocation."\n", 'reset');
 	print colored("Enter destination: ", 'yellow');
         print color('reset');
         my $destiny = <STDIN>;
@@ -123,7 +124,7 @@ switch($input)
 
         printLogo();
         my @absPath = calculatePath($destiny);
-	if(!$absPath[1])
+	if(!$absPath[0])
 	{
             printLogo();
             print "Path not found\n";
@@ -134,6 +135,11 @@ switch($input)
             #It's being kept for later
             for my $path (@absPath)
             {
+                if(!(@$path[0] eq $currentlocation))
+                {
+                    printLogo();
+                    die "Path not found\n";
+                }
                 print "\n";
                 @$path = reverse @$path;
                 pop @$path;
