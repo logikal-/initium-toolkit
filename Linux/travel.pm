@@ -154,7 +154,7 @@ sub Travel($$)
             }
             else
             {
-                print "Could not find $gotoAscii path ID @ $currentlocation\n";
+                die "Could not find $gotoAscii path ID @ $currentlocation\n";
             }
         }
     }
