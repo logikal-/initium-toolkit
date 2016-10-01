@@ -1,10 +1,11 @@
-use strict;
 use warnings;
 use MIME::Base64;
 use Switch;
 use login;
 use market;
 use Term::ANSIColor;
+use path;
+use travel;
 
 my $lg = "ICBfX19fXyAgICAgICBfIF8gICBfICAgICAgICAgICAgICAgIF9fX19fICAgICAgICAgICAgXyBfICAgICAgICAgICAgICAgDQogIFxfICAgXF8gX18gKF8pIHxfKF8pXyAgIF8gXyBfXyBfX18vX18gICBcX19fICAgX19fIHwgfCB8X18gICBfX19fXyAgX18NCiAgIC8gL1wvICdfIFx8IHwgX198IHwgfCB8IHwgJ18gYCBfIFwgLyAvXC8gXyBcIC8gXyBcfCB8ICdfIFwgLyBfIFwgXC8gLw0KL1wvIC9fIHwgfCB8IHwgfCB8X3wgfCB8X3wgfCB8IHwgfCB8IC8gLyB8IChfKSB8IChfKSB8IHwgfF8pIHwgKF8pID4gIDwgDQpcX19fXy8gfF98IHxffF98XF9ffF98XF9fLF98X3wgfF98IHxfXC8gICBcX19fLyBcX19fL3xffF8uX18vIFxfX18vXy9cX1wNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEhhbmQgY29kZWQgd2l0aCBsb3ZlIC0gRnJleWph";
 
@@ -92,7 +93,8 @@ print q(
     [ Main Menu ]
 
     [ 1 ] Market
-    [ 2 ] Exit
+    [ 2 ] Auto Travel
+    [ 3 ] Exit
     );
 print "\n\n    : ";
 
@@ -108,6 +110,41 @@ switch($input)
     case "1"
     {
         market();
+    }
+    case "2"
+    {
+	print colored("Enter destination: ", 'yellow');
+        print color('reset');
+        my $destiny = <STDIN>;
+        chomp($destiny);
+
+        printLogo();
+        my @absPath = calculatePath($destiny);
+	if(!$absPath[0])
+	{
+            print "Path not found\n";
+        }
+        else
+        {
+            #Loop through all sets of paths, but `last` it out
+            #It's being kept for later
+            for my $path (@absPath)
+            {
+                @$path = reverse @$path;
+                pop @$path;
+                @$path = reverse @$path;
+                foreach my $location (@$path)
+                {
+		    print "[+] Traveling to $location\n    ";
+                    my $loopNum = 1;
+                    while(!(Travel($location,$loopNum)))
+                    {
+                        $loopNum++;
+                    }
+                }
+                last;
+            }
+        }
     }
     else
     {
