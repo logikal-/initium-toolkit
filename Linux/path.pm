@@ -2,16 +2,19 @@ use pathAlgorithm;
 use LWP::UserAgent::Determined;
 use HTTP::Cookies;
 use Term::ANSIColor;
+use Time::HiRes qw { usleep };
 
 my %initiumMap =
 (
-    "Aera" => {"North West Hills" => 1, "Aera Countryside" => 1, "Inn" => 1, "Town Hall" => 1, "Artius River" => 1},
+    "Aera" => {"North West Hills" => 1, "Aera Countryside" => 1, "Inn" => 1, "Town Hall" => 1, "Artius River" => 1 },
+    "Aera Inn" => { "Leave the Inn" => 1 },
     "North West Hills" => { "Aera" => 1, "Canyonside Plains" => 2, "Cricketon Cave" => 2, "The Fork" => 1 },
     "Canyonside Plains" => { "Sun Baked Canyon" => 1, "North West Hills" => 1},
     "Sun Baked Canyon" => { "Canyon Cave Entrance" => 1, "Canyonside Plains" => 1 },
     "Canyon Cave Entrance" => { "Immense Cavern" => 1, "Sun Baked Canyon" => 1, "Old Canyon Quarry" => 1 },
     "Old Canyon Quarry" => { "Canyon Cave Entrance" => 1 },
-    "Immense Cavern" => { "Canyon Cave Entrance" => 1, "Claw Marked Crevice" => 1 },
+    "Immense Cavern" => { "Squeeze through" => 1, "Canyon Cave Entrance" => 1 },
+    "Squeeze through" => { "Immense Cavern" => 1, "Drake Cave" => 1 },
     "Claw Marked Crevice" => { "Immense Cavern" => 1, "Drake Cave" => 1 },
     "Drake Cave" => { "Claw Marked Crevice" => 1, "Charred Cavern" => 1 },
     "Charred Cavern" => { "Drake Cave" => 1 },
@@ -140,6 +143,7 @@ my %initiumMap =
 
 sub GetCurrentLocation()
 {
+    my $currentlocation;
     my $cookie_jar = HTTP::Cookies->new(
     file => "initium-cookie.dat",
     autosave => 1,
@@ -172,27 +176,56 @@ sub GetCurrentLocation()
 
 sub calculatePath($)
 {
-    GetCurrentLocation();
+    my $currentlocation = GetCurrentLocation();
+    if($currentlocation =~ m/^Combat site/)
+    {
+        RetreatSingleCombat();
+        $currentlocation = GetCurrentLocation();
+    }
     my $destiny = shift;
     if($currentlocation eq $destiny)
     {
         print "Already at destination $destiny\n";
+        return 0;
     }
+    local $| = 1;
+    my @origindestFound = (0, 0);
+    foreach my $vfx (my @keyNames = keys %initiumMap)
+    {
+        $origindestFound[0] = 1 if $vfx eq $currentlocation;
+        $origindestFound[1] = 1 if $vfx eq $destiny;
+        last if $origindestFound[0] && $origindestFound[1];
+        usleep(8000);
+        print "\rPathfinding: $vfx                       ";
+    }
+    print "\r                                               \r";
+
     my $pathObj = pathAlgorithm->new(-origin=>$currentlocation,-destiny=>$destiny,-graph=>\%initiumMap);
     my @paths = $pathObj->shortest_path();
 
-    my $counter = 1;
+    my $counter = 0;
     for my $path(@paths) 
     {
         if(!@$path)
         {
             print "No path found";
+            return 0;
         }
-        print "Shortest path found:\n";
-        foreach my $location (@$path)
+        my @names = @$path;
+        print color('bold yellow')."ORIGIN:".color('reset').color('bold')." $currentlocation\n".color('reset');
+        foreach my $location (@names)
         {
-            print "$counter. $location\n";
-            $counter++;
+            if($location eq $destiny)
+            {
+                print color('bold yellow')."DEST.:".color('reset').color('bold')." $location\n".color('reset');
+                last;
+            }
+            elsif(!($location eq $currentlocation))
+            {
+                $counter++;
+                usleep(120000);
+                print " - $counter. $location\n";
+            }
         }
 #       print "Cost: ".$pathObj->get_path_cost(@$path)."\n";
         last;

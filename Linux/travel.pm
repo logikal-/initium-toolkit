@@ -52,7 +52,7 @@ sub GetCurrentLocation2()
 
 sub RetreatSingleCombat()
 {
-    print "\rEntered combat, retreating     \n";
+    print "\r -   ".color('red')."[-]".color('reset')." Entered combat, retreating     \n";
     my $cookie_jar = HTTP::Cookies->new(
     file => "initium-cookie.dat",
     autosave => 1,
@@ -94,7 +94,7 @@ sub RetreatSingleCombat()
         }
         else
         {
-            print "[+] Retreated from battle\n";
+            print color('red')." -   [!]".color('reset')." Retreated from battle\n";
             $inCombat = 0;
             last;
         }
@@ -133,13 +133,17 @@ sub Travel($$)
             {
                 RetreatSingleCombat();
                 sleep(2);
-                print "[+] Completing travel\n";
+                print color('green')." -   [+]".color('reset')." Completing travel\n";
                 while(Travel($gotoAscii, 1) == 0)
                 {
                 }
                 return 1;
             }
             if($currentlocation eq $gotoAscii)
+            {
+                return 1;
+            }
+            elsif($gotoAscii eq "Squeeze through" && $currentlocation eq "Claw Marked Crevice")
             {
                 return 1;
             }
