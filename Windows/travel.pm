@@ -28,12 +28,26 @@ sub GetCurrentLocation2()
     $browser->agent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36");
     my $url = "http://playinitium.com/main.jsp";
     my $response = $browser->get($url);
-
-
     #retrieve our current location
     if($response->is_success)
     {
-        
+        if($response->decoded_content =~ m/Sans-serif;'>(\d+)\/(\d+)<\/p>/)
+        {
+            my $currentHealth = $1;
+            my $maxHealth = $2;
+            if($maxHealth*0.75 > $currentHealth)
+            {
+                die "Health is below 75%, dying\n";
+            }
+        }
+        else
+        {
+            die "Could not get health\n";
+        }
+        if($response->decoded_content =~ m/antiBotQuestionPopup/)
+        {
+            die("[-] Antibot captcha detected. Open the home page in your browser.\n");
+        }                                    
         if($response->decoded_content =~ m/location above-page-popup'><a href='main.jsp'>(.*)<\/a><\/div>/)
         {
             $currentlocation = $1;
@@ -82,7 +96,6 @@ sub RetreatSingleCombat()
             } else { die "Couldn't get verify\n"; }
             if($response->decoded_content =~ m/battle is over now/)
             {
-                last;
             }
         } else { die $response->status_line; }
 
@@ -147,6 +160,14 @@ sub Travel($$)
             {
                 return 1;
             }
+            elsif($gotoAscii eq "Head back down the mountain" && $currentlocation eq "Grand Mountain")
+            {
+                return 1;
+            }
+            elsif($gotoAscii eq "Storm the Black Fort gates" && $currentlocation eq "Black Forest")
+            {
+                return 1;
+            }
         } else { die "Couldn't get current location\n"; }
         if($response->decoded_content =~ m/window.verifyCode = "(.*)"/)
         {
@@ -154,14 +175,16 @@ sub Travel($$)
         } else { die "Couldn't get verify\n"; }
         if($loopNum == 1)
         {
-            if($response->decoded_content =~ m/doGoto\(event, (\d{14,18})\)(.{80,200})<\/span>(.{0,14}?)$gotoAscii/) 
+            if($response->decoded_content =~ m/doGoto\(event, (\d{14,18})\)(.{80,200}?)<\/span>(.{0,14}?)$gotoAscii/) 
             {
                 #print "[+] Traveling to $gotoAscii via $1\n";
                 $goto = $1;
             }
             else
             {
-                die "Could not find $gotoAscii path ID @ $currentlocation\n";
+                #print "\rCould not find $gotoAscii path ID @ $currentlocation\n";
+                findExplore($gotoAscii, $currentlocation, $verify);
+                return 1;
             }
         }
     }
@@ -229,5 +252,79 @@ sub Travel($$)
     return $returnValue;
 }
 
+sub findExplore($$$)
+{
+    my $gotoAscii = shift;
+    my $startLocation = shift;
+    my $verify = shift;
+    my $cookie_jar = HTTP::Cookies->new(
+        file => "initium-cookie.dat",
+        autosave => 1,
+        ignore_discard=> 1,
+        ) or die "Unable to access cookie file: $!";
+    my $browser = LWP::UserAgent::Determined->new( requests_redirectable => [ 'GET', 'HEAD', 'POST' ] );
+    $browser->cookie_jar($cookie_jar);
+    $browser->timing("15,30,90");
+    $browser->agent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36");
+    print color('reset green')."\r -  [+]".color('reset')." Exploring to find $gotoAscii\n";
+    my $doneExploring = 0;
+    my $exploreCnt = 0;
+    while($doneExploring == 0)
+    {
+        $exploreCnt++;
+        if($exploreCnt > 50)
+        {
+            print color('yellow bold')."ATTN: ".color('reset bold')."Tried exploring more than 50 times, dying\n".color('reset');
+        }
+        my $currentlocation = GetCurrentLocation2();
+        if(!($currentlocation eq $startLocation))
+        {
+            if($currentlocation eq $gotoAscii)
+            {
+                print color('green')."\r[+] ".color('reset')."Found $gotoAscii\n";
+                last;
+            }
+            else
+            {
+                print color('reset red')."\r[!]".color('reset')." Found $currentlocation, returning to $startLocation\n";
+                my $attemptCnt = 0;
+                while(!(Travel($startLocation, 1)))
+                {
+                    $attemptCnt++;
+                    die "\n[-] Unknown travel error" if $attemptCnt > 10;
+                }
+            }
+        } sleep(2);
+        my $url =  "http://playinitium.com/ServletCharacterControl?type=explore_ajax&ignoreCombatSites=true&v=".$verify;
+        my $response = $browser->get($url);
+        if($response->is_success)
+        {
+            my $content = $response->decoded_content;
+            if($content =~ m/^\{"isComplete":true/)
+            {}
+            elsif($content =~ m/currently in combat/)
+            {
+                RetreatSingleCombat();
+            }
+            elsif($content =~ m/^\{"isComplete":false/)
+            {}
+            else
+            {
+                die "Failed to get proper exploration status\n";
+            }
+            if($content =~ m/"timeLeft":(\d)/)
+            {
+                print "\r[~] Attempt #$exploreCnt";
+                my $timeLeft = $1;
+                sleep(1) if $timeLeft > 3;
+                sleep(1);
+            }
+        }
+        else
+        {
+            die $response->content.$response->status_line;
+        }
+    }
+}
 
 1;

@@ -160,11 +160,16 @@ switch($input)
                     my $loopNum = 1;
                     my $progressbar = Term::ProgressBar->new({ count => 100, term_width=>30 });
                     my $progressCnt = 0;
-                    while(!(Travel($location,$loopNum)))
+                    my $travelReturn = 0;
+                    while(!($travelReturn = Travel($location,$loopNum)))
                     {
-                        if($progressCnt >= 100)
+                        if($travelReturn == 2)
                         {
-                            $progressbar->update(99);
+                            die "Travel returned 2\n";
+                        }
+                        if($progressCnt >= 98)
+                        {
+                            $progressbar->update(100);
                         }
                         else
                         {
