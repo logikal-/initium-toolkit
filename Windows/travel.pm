@@ -103,7 +103,7 @@ sub RetreatSingleCombat()
 
 sub Travel($$)
 {
-    usleep(200000);
+    usleep(100000);
     my $returnValue = 0;
     my $gotoAscii = shift;
     my $loopNum = shift;
@@ -121,7 +121,7 @@ sub Travel($$)
     my $response = $browser->get($url);
     if($response->is_success)
     {
-        usleep(100000);
+        usleep(50000);
         if($response->decoded_content =~ m/antiBotQuestionPopup/)
         {
             die("[-] Antibot captcha detected. Open the home page in your browser.\n");

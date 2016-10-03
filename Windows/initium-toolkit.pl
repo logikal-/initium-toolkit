@@ -171,7 +171,7 @@ switch($input)
                             for($progressCnt;$progressCnt < $loopNum * 33;$progressCnt++)
                             {
                                 $progressbar->update($progressCnt);
-                                usleep(20000);
+                                usleep(18000);
                             }
                         }
                         $loopNum++;
