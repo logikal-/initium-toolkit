@@ -202,7 +202,19 @@ sub market()
 							{
 								print "[+] Purchase successful\n";
 						
-							} else { print "Purchase failed for some reason\n".$response->content."\n".$response->status_line."\n"; }
+							} 
+                                                        else 
+                                                        { 
+                                                            print "Purchase failed for some reason\n".$response->status_line."\n";
+                                                            if($response->decoded_content =~ m/enough funds/) 
+                                                            { 
+                                                                print "Not enough gold\n"; 
+                                                            }
+                                                            else 
+                                                            {
+                                                                print $response->decoded_content; 
+                                                            }
+                                                        }
 						} else { die("Error 5502: Unable to purchase item: $!\n".$response->status_line."\n"); }
 					}
 				}
