@@ -8,6 +8,8 @@ use path;
 use travel;
 use Term::ProgressBar;
 use Time::HiRes qw{ usleep time };
+use sigtrap qw/handler signal_handler normal-signals/;
+sub signal_handler();
 
 my $lg = "ICBfX19fXyAgICAgICBfIF8gICBfICAgICAgICAgICAgICAgIF9fX19fICAgICAgICAgICAgXyBfICAgICAgICAgICAgICAgDQogIFxfICAgXF8gX18gKF8pIHxfKF8pXyAgIF8gXyBfXyBfX18vX18gICBcX19fICAgX19fIHwgfCB8X18gICBfX19fXyAgX18NCiAgIC8gL1wvICdfIFx8IHwgX198IHwgfCB8IHwgJ18gYCBfIFwgLyAvXC8gXyBcIC8gXyBcfCB8ICdfIFwgLyBfIFwgXC8gLw0KL1wvIC9fIHwgfCB8IHwgfCB8X3wgfCB8X3wgfCB8IHwgfCB8IC8gLyB8IChfKSB8IChfKSB8IHwgfF8pIHwgKF8pID4gIDwgDQpcX19fXy8gfF98IHxffF98XF9ffF98XF9fLF98X3wgfF98IHxfXC8gICBcX19fLyBcX19fL3xffF8uX18vIFxfX18vXy9cX1wNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEhhbmQgY29kZWQgd2l0aCBsb3ZlIC0gRnJleWph";
 
@@ -40,31 +42,33 @@ while(my $line = <$fh>)
 close($fh);
 if(!$email || !$password)
 {
-    print color('yellow');
+    print color('bold yellow');
     if(!$email) { 
     print q(
         [ Login ]
 
         Enter email: );
-    print color('reset');
+    print color('reset').color('bold');
     $email = <STDIN>;
+    print color('reset');
     chomp($email);
     }
     printLogo();
-    print color('yellow');
+    print color('bold yellow');
     print q(
         [ Login ]
         
-        Email: ); print $email;
+        Email: ); print color('reset').color('bold').$email.color('bold yellow');
     print q(
         Enter password: );
-    print color('reset');
+    print color('reset').color('bold');
     
     $password = <STDIN>;
+    print color('reset');
     chomp($password);
 
     printLogo();
-    print color('yellow');
+    print color('bold yellow');
     print q(
         [ Login ]
 
@@ -72,9 +76,10 @@ if(!$email || !$password)
         WARNING: Password will be
         saved in plaintext in file
         "initium-initfo.dat": );
-    print color('reset');
+    print color('reset').color('bold');
     my $savePass = <STDIN>;
     chomp($savePass);
+    print color('reset');
     open(my $fh, '>', "./initium-initfo.dat") or die("Couldn't open file: $!\n");
     if($savePass eq "y" || $savePass eq "Y")
     {
@@ -98,19 +103,15 @@ print "Logged in as:".color('reset').color('bold')." $email\n";
 print color('reset').color('bold yellow');
 print q(
     [ Main Menu ]
-
     );
     print color('reset');
-    print color('yellow')."\n    [ 1 ]".color('reset')." Market";
-    print color('yellow')."\n    [ 2 ]".color('reset')." Auto Travel";
-    print color('yellow')."\n    [ 3 ]".color('reset')." Exit";
+    print color('bold yellow')."\n    [ 1 ]".color('reset').color('bold')." Market";
+    print color('bold yellow')."\n    [ 2 ]".color('reset').color('bold')." Auto Travel";
+    print color('bold yellow')."\n    [ 3 ]".color('reset').color('bold')." Exit";
 print "\n\n    : ";
-
-print color('reset');
-
 my $input = <STDIN>;
 chomp($input);
-
+print color('reset');
 printLogo();
 
 switch($input)
@@ -122,10 +123,10 @@ switch($input)
     case "2"
     {
         my $currentlocation = GetCurrentLocation();
-        print colored("Current location: ", 'yellow');
-        print colored($currentlocation."\n", 'reset');
-	print colored("Enter destination: ", 'yellow');
-        print color('reset');
+        print colored("Current location: ", 'bold yellow');
+        print colored($currentlocation."\n", 'reset bold');
+	print colored("Enter destination: ", 'bold yellow');
+        print color('reset bold');
         my $destiny = <STDIN>;
         chomp($destiny);
 
@@ -134,8 +135,6 @@ switch($input)
         my $startTime = time;
 	if(!$absPath[0])
 	{
-            printLogo();
-            print "Path not found\n";
         }
         else
         {
@@ -152,11 +151,12 @@ switch($input)
                 @$path = reverse @$path;
                 pop @$path;
                 @$path = reverse @$path;
+                local $| = 1;
                 foreach my $location (@$path)
                 {
-                    print colored("[+] ", 'green');
+                    print colored("\r[+] ", 'green');
                     print color('reset');
-                    print "\rTraveling to $location\n";
+                    print "Traveling to $location\n";
                     my $loopNum = 1;
                     my $progressbar = Term::ProgressBar->new({ count => 100, term_width=>30 });
                     my $progressCnt = 0;
@@ -176,7 +176,7 @@ switch($input)
                         }
                         $loopNum++;
                     }
-                    $progressbar->update(100);print "\r\n";#  print "\r   -  Traveled to $location              \n";
+                    $progressbar->update(100);print "\r                                 ";
                 }
                 last;
             }
@@ -202,3 +202,7 @@ switch($input)
 
 print color('reset');
 
+sub signal_handler
+{ 
+    die "\nCaught a termination signal\nReload initium in your browser before using the bot again,\nkilling the bot with sigint messes some stuff up\n";
+};

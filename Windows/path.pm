@@ -178,6 +178,14 @@ my %initiumMap =
 "Orc Prince" => { "Orc Camp 2" => 1 },
 
 );
+my $lg = "ICBfX19fXyAgICAgICBfIF8gICBfICAgICAgICAgICAgICAgIF9fX19fICAgICAgICAgICAgXyBfICAgICAgICAgICAgICAgDQogIFxfICAgXF8gX18gKF8pIHxfKF8pXyAgIF8gXyBfXyBfX18vX18gICBcX19fICAgX19fIHwgfCB8X18gICBfX19fXyAgX18NCiAgIC8gL1wvICdfIFx8IHwgX198IHwgfCB8IHwgJ18gYCBfIFwgLyAvXC8gXyBcIC8gXyBcfCB8ICdfIFwgLyBfIFwgXC8gLw0KL1wvIC9fIHwgfCB8IHwgfCB8X3wgfCB8X3wgfCB8IHwgfCB8IC8gLyB8IChfKSB8IChfKSB8IHwgfF8pIHwgKF8pID4gIDwgDQpcX19fXy8gfF98IHxffF98XF9ffF98XF9fLF98X3wgfF98IHxfXC8gICBcX19fLyBcX19fL3xffF8uX18vIFxfX18vXy9cX1wNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEhhbmQgY29kZWQgd2l0aCBsb3ZlIC0gRnJleWph";
+
+sub printLogo()
+{
+
+        system $^O eq 'MSWin32' ? 'cls' : 'clear';
+            print colored(decode_base64($lg)."\n", 'bold yellow');
+}
 
 sub GetCurrentLocation()
 {
@@ -227,7 +235,7 @@ sub calculatePath($)
         return 0;
     }
     local $| = 1;
-    my @origindestFound = (0, 0);
+    my @origindestFound = (0, 0, "");
     foreach my $vfx (my @keyNames = keys %initiumMap)
     {
         $origindestFound[0] = 1 if $vfx eq $currentlocation;
@@ -235,6 +243,48 @@ sub calculatePath($)
         last if $origindestFound[0] && $origindestFound[1];
         usleep(8000);
         print "\rPathfinding: $vfx                       ";
+    }
+    if(!$origindestFound[1])
+    {
+        my @possibleDests = ();
+        foreach my $key (my @keyNames = keys %initiumMap)
+        {
+            push(@possibleDests, $key) if $key =~ m/$destiny/i;
+        }
+        if($#possibleDests > 1)
+        {
+            print color('bold yellow');
+            print "\rNo match for ".color('reset').color('bold').$destiny.color('bold yellow').", choose from the following:\n".color('reset');
+            my $destCnt = 1;
+            foreach my $possibleDest (@possibleDests)
+            {
+                print color('bold yellow');
+                print "$destCnt. ".color('reset').color('bold').$possibleDest."\n".color('reset');
+                $destCnt++;
+            }
+            print color('bold yellow')."> ".color('reset').color('bold');
+            my $newDest = <STDIN>;
+            chomp($newDest);
+            print color('reset');
+            printLogo();
+            if(@possibleDests[$newDest - 1])
+            {
+                $destiny = @possibleDests[$newDest- 1];
+            }
+            else
+            {
+                print color('bold yellow')."\rDestination ".color('reset').color('bold').$destiny.color('bold yellow')." not found\n".color('reset');
+                return 0;
+            }
+        }
+        else
+        {
+            print color('bold yellow');
+            print "\rFound ".color('reset').color('bold').@possibleDests[0].color('bold yellow')." for partial name ".color('reset').color('bold').$destiny."\n";
+            $destiny = @possibleDests[0];
+            color('reset');
+        }
+        
     }
     print "\r                                               \r";
 
@@ -255,7 +305,24 @@ sub calculatePath($)
         {
             if($location eq $destiny)
             {
-                print color('bold yellow')."DEST.:".color('reset').color('bold')." $location\n".color('reset');
+                print color('bold yellow')."DEST.:".color('reset').color('bold')." $location\n\n".color('reset');
+                print color('bold yellow')."ETA: ".color('reset').color('bold');
+                $counter > 2 ? $counter += 2 : $counter += 1;
+                my $ETA = ($counter*8)+1;
+                $ETA += 3 if $ETA == 9;
+                if ($ETA > 60)
+                {
+                    my $ETAMins = $ETA / 60;
+                    my $ETASecs = int(($ETA % 60) + 0.5);
+                    printf("%.0f", "$ETAMins"); 
+                    print " minute"; print "s" if $ETAMins > 1;
+                    print ", $ETASecs seconds\n";
+                }
+                else
+                {
+                    print $ETA." seconds\n";
+                }
+                print color('reset');
                 last;
             }
             elsif(!($location eq $currentlocation))
