@@ -107,7 +107,7 @@ print q(
     print color('reset');
     print color('bold yellow')."\n    [ 1 ]".color('reset').color('bold')." Market";
     print color('bold yellow')."\n    [ 2 ]".color('reset').color('bold')." Auto Travel";
-    print color('bold yellow')."\n    [ 3 ]".color('reset').color('bold')." Exit";
+    print color('bold yellow')."\n    [ 3 ]".color('reset').color('bold')." Exit\n\n    Please don't refresh Initium in your browser, it will mess up the bot\n";
 print "\n\n    : ";
 my $input = <STDIN>;
 chomp($input);
@@ -160,20 +160,15 @@ switch($input)
                     my $loopNum = 1;
                     my $progressbar = Term::ProgressBar->new({ count => 100, term_width=>30 });
                     my $progressCnt = 0;
-                    my $travelReturn = 0;
-                    while(!($travelReturn = Travel($location,$loopNum)))
+                    while(!Travel($location,$loopNum))
                     {
-                        if($travelReturn == 2)
-                        {
-                            die "Travel returned 2\n";
-                        }
                         if($progressCnt >= 98)
                         {
                             $progressbar->update(100);
                         }
                         else
                         {
-                            for($progressCnt;$progressCnt < $loopNum * 33;$progressCnt++)
+                            for($progressCnt=$progressCnt;$progressCnt < $loopNum * 33;$progressCnt++)
                             {
                                 $progressbar->update($progressCnt);
                                 usleep(18000);
