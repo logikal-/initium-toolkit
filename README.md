@@ -1,7 +1,26 @@
 #Initium Toolkit 
 
-Pathfinding is fully setup, but I don't have the entire map recorded yet. It's going to take a while - if you want to see what I mean, look in path.pm
-Right now you can auto travel to mostly anywhere east of Aera and from Aera to Valentis. I'm working on it, probably 3 or 4 weeks to map completion
+##Main feature: Auto-travel
+
+
+ - Features dijkstra's pathfinding algorithm
+
+ - ~20% of map completed
+   
+ - Will automatically explore if a location on the path hasn't been discovered
+
+ - Checks health, the bot will stop if your health falls below 75%
+
+
+##Secondary feature: market searcher/buyer
+
+
+ - Search by partial or full name, ie "prot"
+  
+ - Searches every store at your current location
+
+ - Optionally, buy items
+
 
 ##Installation instructions:
 
