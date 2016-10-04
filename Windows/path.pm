@@ -42,6 +42,7 @@ my %initiumMap =
     "Head back down the mountain" => { "Grand Mountain" => 1, "Frozen Cavern" => 2 },
     "Frozen Cavern" => { "Grand Mountain Summit" => 1 },
     "North Mountain Range" => { "Desert" => 1, "Black Mountain" => 1, "North Mountain Range Stone Tower" => 1 },
+    "Hidden Pass" => { "Black Mountain" => 1, "Eastern Desert" => 1 },
     "North Mountain Range Stone Tower" => { "North Mountain Range" => 1 },
     "Black Mountain" => { "North Mountain Range" => 1, "Hidden Pass" => 2, "Narrow Stairway" => 1, "Black Forest" => 1 },
     "Narrow Stairway" => { "Black Mountain" => 1 },
@@ -182,7 +183,7 @@ my %initiumMap =
 );
 my $lg = "ICBfX19fXyAgICAgICBfIF8gICBfICAgICAgICAgICAgICAgIF9fX19fICAgICAgICAgICAgXyBfICAgICAgICAgICAgICAgDQogIFxfICAgXF8gX18gKF8pIHxfKF8pXyAgIF8gXyBfXyBfX18vX18gICBcX19fICAgX19fIHwgfCB8X18gICBfX19fXyAgX18NCiAgIC8gL1wvICdfIFx8IHwgX198IHwgfCB8IHwgJ18gYCBfIFwgLyAvXC8gXyBcIC8gXyBcfCB8ICdfIFwgLyBfIFwgXC8gLw0KL1wvIC9fIHwgfCB8IHwgfCB8X3wgfCB8X3wgfCB8IHwgfCB8IC8gLyB8IChfKSB8IChfKSB8IHwgfF8pIHwgKF8pID4gIDwgDQpcX19fXy8gfF98IHxffF98XF9ffF98XF9fLF98X3wgfF98IHxfXC8gICBcX19fLyBcX19fL3xffF8uX18vIFxfX18vXy9cX1wNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEhhbmQgY29kZWQgd2l0aCBsb3ZlIC0gRnJleWph";
 
-sub printLogo2()
+sub printLogo()
 {
 
         system $^O eq 'MSWin32' ? 'cls' : 'clear';
@@ -268,7 +269,7 @@ sub calculatePath($)
             my $newDest = <STDIN>;
             chomp($newDest);
             print color('reset');
-            printLogo2();
+            printLogo();
             if(@possibleDests[$newDest - 1])
             {
                 $destiny = @possibleDests[$newDest- 1];

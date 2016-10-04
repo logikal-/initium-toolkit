@@ -42,6 +42,7 @@ my %initiumMap =
     "Head back down the mountain" => { "Grand Mountain" => 1, "Frozen Cavern" => 2 },
     "Frozen Cavern" => { "Grand Mountain Summit" => 1 },
     "North Mountain Range" => { "Desert" => 1, "Black Mountain" => 1, "North Mountain Range Stone Tower" => 1 },
+    "Hidden Pass" => { "Black Mountain" => 1, "Eastern Desert" => 1 },
     "North Mountain Range Stone Tower" => { "North Mountain Range" => 1 },
     "Black Mountain" => { "North Mountain Range" => 1, "Hidden Pass" => 2, "Narrow Stairway" => 1, "Black Forest" => 1 },
     "Narrow Stairway" => { "Black Mountain" => 1 },
