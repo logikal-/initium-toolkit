@@ -108,8 +108,8 @@ sub market()
 						print "\n$counter. "; #[ $itemName ]\n";
 						my $content3 = $response->decoded_content;
 						$content3 =~ s/<!--  Comparisons -->(.*)//s;
-						print "\n[ $tempItemName ] ";
-						print "\nItem price: $itemPrice ";
+						print " [ $tempItemName ]\t";
+						print "Item price: $itemPrice ";
 						$itemPrice =~ s/,//g;
 						if($content3 =~ m/Dexterity penalty: <div class='main-item-subnote'>([\d\-\.]{1,4})%/)
 						{
