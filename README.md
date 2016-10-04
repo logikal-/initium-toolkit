@@ -21,6 +21,7 @@
 
  - Optionally, buy items
 
+ - Displays item stats; dex pen, block chance, dmg reduction, etc.
 
 ##Installation instructions:
 
