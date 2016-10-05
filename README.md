@@ -68,4 +68,16 @@ Use cpan to install the required modules:
 to start the program:
 
     perl initium-toolkit.pl
-    
+
+
+##Troubleshooting
+
+If you're having issues in Windows, open a command prompt. You can open a command
+prompt by opening your start menu and searching for 'cmd'. Run the program from
+within the command prompt by either dragging the icon into the window, or typing 'perl' followed
+by the path to the file, like this:
+
+    perl C:/Users/Someone/Desktop/initium-toolkit.pl
+
+If the error is related to barewords, re-download the toolkit from GitHub. If it's anything else,
+report it to me directly and I'll fix it ASAP.
