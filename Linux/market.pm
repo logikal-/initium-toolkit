@@ -59,6 +59,9 @@ sub market()
     my $itemName = <STDIN>;
     ClearScr();
     chomp($itemName);
+    print "\nMaximum dex pen? (Enter a number or press enter):\n";
+    my $dexPenMaximum = <STDIN>;
+    chomp($dexPenMaximum);
     print "Enumerating items containing \"$itemName\" in all stores in $currentlocation...\n";
     print "...............................................................................\n";
     $url = "https://www.playinitium.com/locationmerchantlist.jsp";
@@ -113,7 +116,16 @@ sub market()
 						$itemPrice =~ s/,//g; if($itemPrice < 100){ print "\t"; } #even it out
 						if($content3 =~ m/Dexterity penalty: <div class='main-item-subnote'>([\d\-\.]{1,4})%/)
 						{
-							print "\tDex pen: $1% ";
+                                                        my $dexPen = $1;
+                                                        if($dexPenMaximum)
+                                                        {
+                                                            if($dexPen > $dexPenMaximum)
+                                                            {
+                                                                print color('red')."\r\t[ Item above maximum dex pen ]                                     ".color('reset');
+                                                                next;
+                                                            }
+                                                        }
+							print "\tDex pen: $dexPen% ";
 						}
 						$itemPrice =~ s/,//;
 						if($content3 =~ m/Durability: <div class='main-item-subnote'>(\d{1,6})\/(\d{1,6})<\/div>/)
