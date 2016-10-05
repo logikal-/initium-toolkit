@@ -31,11 +31,11 @@ sub GetCurrentLocation2()
     #retrieve our current location
     if($response->is_success)
     {
-        if($response->decoded_content =~ m/Sans-serif;'>(\d+)\/(\d+)<\/p>/)
+        if($response->decoded_content =~ m/Sans-serif;'>(\d{1,2})\/(\d{1,2})<\/p>/)
         {
             my $currentHealth = $1;
             my $maxHealth = $2;
-            if($maxHealth*0.75 > $currentHealth)
+            if($currentHealth < $maxHealth*0.75)
             {
                 die "Health is below 75%, dying\n";
             }
@@ -53,7 +53,7 @@ sub GetCurrentLocation2()
             $currentlocation = $1;
             if($currentlocation =~ m/^Combat site/)
             {
-                RetreatSingleCombat();
+                RetreatSingleCombatTravel();
             }
         } else { die "Couldn't get current location\n"; }
         if($response->decoded_content =~ m/window.verifyCode = "(.*)"/)
@@ -64,7 +64,7 @@ sub GetCurrentLocation2()
     return $currentlocation;
 }
 
-sub RetreatSingleCombat()
+sub RetreatSingleCombatTravel()
 {
     print "\r -   ".color('red')."[-]".color('reset')." Entered combat, retreating     \n";
     my $cookie_jar = HTTP::Cookies->new(
@@ -89,6 +89,22 @@ sub RetreatSingleCombat()
             if($response->decoded_content =~ m/location above-page-popup'><a href='main.jsp'>(.*)<\/a><\/div>/)
             {
                 $currentlocation = $1;    
+                if($currentlocation =~ m/(Giant ogre|Protector)/i)
+                {
+                    printLogo();
+                    my $boss = $currentlocation;
+                    $boss =~ s/^Combat site: //;
+                    print color('bold red')." ENCOUNTERED BOSS: $boss\n".color('reset');
+                    while(1)
+                    {
+                        print "\r ".color('bold red')."[!] BOSS ENCOUNTER [!]";
+                        usleep(500000);
+                        system('(( speaker-test -t sine -f 800 )& pid=$! ; sleep 0.5s ; kill -9 $pid) > /dev/null');
+                        print "\r ".color('reset bold')."[!] BOSS ENCOUNTER [!]";
+                        usleep(500000);
+                        system('(( speaker-test -t sine -f 2000 )& pid=$! ; sleep 0.5s ; kill -9 $pid) > /dev/null');
+                    }
+                }
             } else { die "Couldn't get current location\n"; }
             if($response->decoded_content =~ m/window.verifyCode = "(.*)"/)
             {
@@ -99,17 +115,31 @@ sub RetreatSingleCombat()
             }
         } else { die $response->status_line; }
 
-        if($currentlocation =~ m/^Combat site/)
+        if($currentlocation =~ m/^Combat site/ && $response->decoded_content !~ m/battle is over now/s)
         {
             $url = "http://playinitium.com/ServletCharacterControl?type=escape&v=".$verify;
             #print "[-] Trying to retreat from battle\n";
             $response = $browser->get($url) or die $response->status_line;
         }
-        else
+        elsif($response->decoded_content !~ m/battle is over now/s)
         {
             print color('red')." -   [!]".color('reset')." Retreated from battle\n";
             $inCombat = 0;
             last;
+        }
+        if($response->decoded_content =~ m/battle is over now/s)
+        {
+            if($response->decoded_content =~ m/leaveAndForgetCombatSite\((\d{14,18}?)\)/)
+            {
+                my $pathId = $1;
+                $url = "https://www.playinitium.com/ServletCharacterControl?type=gotoAndForget&pathId=$pathId&v=".$verify;
+                $response = $browser->get($url) or die $response->content.$response->status_line;
+            }
+            else
+            {
+                print "Couldn't find path ID to leave combat site\n";
+                die();
+            }
         }
     }
 }
@@ -144,7 +174,7 @@ sub Travel($$)
             $currentlocation = $1;
             if($currentlocation =~ m/^Combat site/)
             {
-                RetreatSingleCombat();
+                RetreatSingleCombatTravel();
                 sleep(2);
                 print color('green')." -   [+]".color('reset')." Completing travel\n";
                 while(Travel($gotoAscii, 1) == 0)
@@ -266,7 +296,14 @@ sub findExplore($$$)
     $browser->cookie_jar($cookie_jar);
     $browser->timing("15,30,90");
     $browser->agent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36");
-    print color('reset green')."\r -  [+]".color('reset')." Exploring to find $gotoAscii\n";
+    if($gotoAscii =~ m/\(Explore for Bosses\)/)
+    {
+        print color('reset green')."\r - [+]".color('reset')." Searching for bosses\n";
+    }
+    else
+    {
+        print color('reset green')."\r -  [+]".color('reset')." Exploring to find $gotoAscii\n";
+    }
     my $doneExploring = 0;
     my $exploreCnt = 0;
     while($doneExploring == 0)
@@ -274,7 +311,7 @@ sub findExplore($$$)
         $exploreCnt++;
         if($exploreCnt > 50)
         {
-            print color('yellow bold')."ATTN: ".color('reset bold')."Tried exploring more than 50 times, dying\n".color('reset');
+#            print color('yellow bold')."ATTN: ".color('reset bold')."Tried exploring more than 50 times, dying\n".color('reset');
         }
         my $currentlocation = GetCurrentLocation2();
         if(!($currentlocation eq $startLocation))
@@ -288,10 +325,37 @@ sub findExplore($$$)
             {
                 print color('reset red')."\r[!]".color('reset')." Found $currentlocation, returning to $startLocation\n";
                 my $attemptCnt = 0;
-                while(!(Travel($startLocation, 1)))
+                if($currentlocation =~ m/^Destroyed camp/)
                 {
-                    $attemptCnt++;
-                    die "\n[-] Unknown travel error" if $attemptCnt > 10;
+                    my $url = "http://playinitium.com/main.jsp";
+                    my $response = $browser->get($url);
+                    if($response->is_success)
+                    {
+                        if($response->decoded_content =~ m/leaveAndForgetCombatSite\((\d{14,18}?)\)/)
+                        {
+                            my $pathId = $1;
+                            $url = "https://www.playinitium.com/ServletCharacterControl?type=gotoAndForget&pathId=$pathId&v=".$verify;
+                            $response = $browser->get($url) or die $response->content.$response->status_line;
+                        }
+                        else
+                        {
+                            print "Could not find path ID to leave destroyed camp\n";
+                            die();
+                        }
+                    }
+                    else
+                    {
+                        print "Could not get main.jsp\n";
+                        die();
+                    }
+                }
+                else
+                {
+                    while(!(Travel($startLocation, 1)))
+                    {
+                         $attemptCnt++;
+                         die "\n[-] Unknown travel error" if $attemptCnt > 10;
+                    }
                 }
             }
         } sleep(2);
@@ -304,7 +368,7 @@ sub findExplore($$$)
             {}
             elsif($content =~ m/currently in combat/)
             {
-                RetreatSingleCombat();
+                RetreatSingleCombatTravel();
             }
             elsif($content =~ m/^\{"isComplete":false/)
             {}

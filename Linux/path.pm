@@ -28,7 +28,8 @@ my %initiumMap =
     "Infested Tunnel" => { "Cricketon Cave" => 1, "Baron Cricketon's Lair" => 2 },
     "Baron Cricketon's Lair" => { "Infested Tunnel" => 1 },
     "Wildeburn Forest" => { "Aera Countryside" => 1, "Taelhollow Swamp" => 1 },
-    "Taelhollow Swamp" => { "Wildeburn Forest" => 1, "Taelhollow Swamp Shrine" => 1, "Taelhollow Hut" => 1 },
+    "Taelhollow Swamp" => { "Wildeburn Forest" => 1, "Taelhollow Swamp Shrine" => 1, "Taelhollow Hut" => 1, "Taelhollow Swamp (Explore for Bosses)" => 50 },
+    "Taelhollow Swamp (Explore for Bosses)" => { },
     "Taelhollow Swamp Shrine" => { "Taelhollow Swamp" => 1 },
     "Taelhollow Hut" => { "Taelhollow Swamp" => 1 },
     "Troll Camp" => { "Aera Swamplands" => 1, "Troll Cave Entrance" => 1 },
@@ -228,7 +229,7 @@ sub calculatePath($)
     my $currentlocation = GetCurrentLocation();
     if($currentlocation =~ m/^Combat site/)
     {
-        RetreatSingleCombat();
+        RetreatSingleCombatTravel();
         $currentlocation = GetCurrentLocation();
     }
     my $destiny = shift;

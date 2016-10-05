@@ -204,5 +204,6 @@ print color('reset');
 
 sub signal_handler
 { 
-    die "\nCaught a termination signal\nReload initium in your browser before using the bot again,\nkilling the bot with sigint messes some stuff up\n".color('reset');
+    system $^O eq 'MSWin32' ? '' : 'killall speaker-test > /dev/null';
+    die "\nCaught a termination signal\nReload initium in your browser before using the bot again,\nkilling the bot with sigint messes some stuff up\n".color('reset')." ";
 };
