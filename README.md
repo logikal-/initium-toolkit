@@ -1,6 +1,6 @@
 #Initium Toolkit 
 
-##Main feature: Auto-travel
+##Auto-travel
 
 
  - Features dijkstra's pathfinding algorithm
@@ -12,7 +12,7 @@
  - Checks health, the bot will stop if your health falls below 75%
 
 
-##Secondary feature: market searcher/buyer
+##Market searcher/buyer
 
 
  - Search by partial or full name, ie "prot"
